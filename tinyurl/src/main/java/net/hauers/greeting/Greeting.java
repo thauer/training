@@ -1,4 +1,4 @@
-package net.tamashauer.tinyurl
+package net.hauers.greeting;
 
 public class Greeting {
   private final long id;
@@ -6,8 +6,9 @@ public class Greeting {
 
   public Greeting(long id, String content) {
     this.id = id;
-    this.contenet = content;
+    this.content = content;
   }
+
   public String getContent() {
     return content;
   }

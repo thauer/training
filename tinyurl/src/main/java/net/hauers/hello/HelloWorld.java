@@ -1,4 +1,4 @@
-package net.tamashauer.tinyurl;
+package net.hauers.hello;
 
 import org.joda.time.LocalTime;
 

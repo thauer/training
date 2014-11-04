@@ -1,13 +1,45 @@
-apply plugin: 'java'
-apply plugin: 'application'
+buildscript { // to be able to add the spring-boot gradle plugin
+  repositories {
+    maven { url "http://repo.spring.io/libs-release" }
+    mavenLocal()
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE"
+  }
+}
 
-mainClassName = 'net.tamashauer.tinyurl.HelloWorld'
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: 'groovy'
+
+mainClassName = "net.hauers.hello.HelloWorld"
+mainClassName = "net.hauers.greeting.Application"
+
+jar {
+  baseName = 'gs-rest-service'
+  version = '0.1.0'
+}
 
 repositories {
   mavenLocal()
   mavenCentral()
+  maven { url "http://repo.spring.io/libs-release" }
 }
 
 dependencies {
-  compile "joda-time:joda-time:2.2"
+  compile "joda-time:joda-time"
+  compile "org.springframework.boot:spring-boot-starter-web"
+
+  testCompile "org.codehaus.groovy:groovy-all"
+  testCompile "org.spockframework:spock-core"
+  testCompile "org.springframework:spring-test"
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.1'
+}
+
+test.testLogging { 
+  exceptionFormat "full" 
 }

@@ -1,4 +1,4 @@
-package net.tamashauer.tinyurl;
+package net.hauers.hello;
 
 public class Greeter {
 	public String sayHello() {
