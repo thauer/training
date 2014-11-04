@@ -15,9 +15,10 @@ apply plugin: 'groovy'
 
 mainClassName = "net.hauers.hello.HelloWorld"
 mainClassName = "net.hauers.greeting.Application"
+mainClassName = "net.hauers.formvalid.Application"
 
 jar {
-  baseName = 'gs-rest-service'
+  baseName = 'spring-training'
   version = '0.1.0'
 }
 
