@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+jar {
+  baseName = 'algo-training'
+  version = '0.1.0'
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  testCompile "org.codehaus.groovy:groovy-all:2.3.7"
+  testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.1'
+}
+
+test.testLogging { 
+  exceptionFormat "full" 
+}
