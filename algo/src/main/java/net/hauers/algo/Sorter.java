@@ -10,32 +10,30 @@ public class Sorter {
   }
 
   public static <T extends Comparable<? super T>> void qsort(List<T> list, int start, int end) {
+    int left = start;
+    int right = end;
 
-    // int pivot = start;
-
-    // int left = start;
-    // int right = end;
-
-    // for(; list.get(left).compareTo(list.get(pivot))<0; left++);
+    for(;left<right;){
+      right = moveright(list, left++, right);
+      left = moveleft(list, left, right--);
+    }
     
-    // swap(list, left, pivot);
-    // int tmp = pivot
-    // int pivot = left
-    // int left = tmp
-
-    // for(; list.get(right).compareTo(list.get(pivot))>0; right--);
-    
-    // swap(list, right, pivot);
-    // int tmp = pivot
-    // int pivot = right
-    // int right = tmp
-
+    if(start<right) qsort(list, start, right);
+    if(left<end) qsort(list, left, end);
   }
 
+  public static <T extends Comparable<? super T>> int moveright(List<T> list, int start, int end) {
+    int i = end;
+    for(; list.get(i).compareTo(list.get(start)) > 0; i--);
+    if(i > start) swap(list, i, start);
+    return i;
+  }
 
-  public static <T extends Comparable<? super T>> int walkleft(List<T> list, int start, int end) {
-    int pivot = start;
-    
+  public static <T extends Comparable<? super T>> int moveleft(List<T> list, int start, int end) {
+    int i = start;
+    for(; list.get(i).compareTo(list.get(end)) < 0; i++);
+    if(i < end) swap(list, i, end);
+    return i;
   }
 
   public static <T> void swap(List<T> list, int i1, int i2) {
