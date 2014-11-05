@@ -33,35 +33,6 @@ class SorterSpec extends Specification {
     list == [3, 2, 5, 5, 6, 7, 8, 0, 3, 4, 9]
   }  
 
-
-  def "moveright() exchanges the leftmost element with the rightmost smaller"() {
-    given:
-    def list = [3, 1, 2, 0, 4]
-
-    when: "Calling moveright()"
-    def newend = Sorter.moveright(list, 0, 4)
-
-    then: "The leftmost element is exchanged with the rightmost smaller"
-    list == [0, 1, 2, 3, 4]
-
-    and: "The new right endpoint is set just before the greater ones"
-    newend == 3
-  }
-
-  def "moveleft() exchanges the rightmost element with the leftmost greater"() {
-    given:
-    def list = [1, 1, 3, 0, 2]
-
-    when: "Calling moveleft()"
-    def newstart = Sorter.moveleft(list, 0, 4)
-
-    then: "The rightmost element is exchanged with the leftmost smaller"
-    list == [1, 1, 2, 0, 3]
-
-    and: "The new left endpoint is set just after the smaller ones"
-    newstart == 2
-  }
-
   def "Swap swaps"() {
     given:
     def list = [1, 2, 3, 4]

@@ -10,30 +10,18 @@ public class Sorter {
   }
 
   public static <T extends Comparable<? super T>> void qsort(List<T> list, int start, int end) {
-    int left = start;
-    int right = end;
-
-    for(;left<right;){
-      right = moveright(list, left++, right);
-      left = moveleft(list, left, right--);
+    if(start>=end) {
+      return;
     }
-    
-    if(start<right) qsort(list, start, right);
-    if(left<end) qsort(list, left, end);
-  }
-
-  public static <T extends Comparable<? super T>> int moveright(List<T> list, int start, int end) {
-    int i = end;
-    for(; list.get(i).compareTo(list.get(start)) > 0; i--);
-    if(i > start) swap(list, i, start);
-    return i;
-  }
-
-  public static <T extends Comparable<? super T>> int moveleft(List<T> list, int start, int end) {
-    int i = start;
-    for(; list.get(i).compareTo(list.get(end)) < 0; i++);
-    if(i < end) swap(list, i, end);
-    return i;
+    int right = start - 1;
+    for(int i = start; i <= end; i++) {
+      if(list.get(i).compareTo(list.get(end)) < 0) {
+        swap(list, i, ++right);
+      }
+    }
+    swap(list, end, ++right);
+    qsort(list, start, right-1);
+    qsort(list, right+1, end);
   }
 
   public static <T> void swap(List<T> list, int i1, int i2) {
@@ -42,3 +30,4 @@ public class Sorter {
     list.set(i2, temp);
   }
 }
+
