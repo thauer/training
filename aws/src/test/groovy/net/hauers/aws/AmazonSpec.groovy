@@ -36,7 +36,8 @@ class AmazonSpec extends Specification {
     regions.any{it.regionName == "us-east-1"}
   }
 
-  def "Can request spot instances"() {
+  @IgnoreRest
+  def "A single spot instance can be requested, it should be fulfilled and started"() {
 
     given: "An AWS EC2 handle"
     AmazonEC2 ec2Client = new AmazonEC2Client().withRegion(Region.getRegion(Regions.EU_WEST_1));
@@ -48,39 +49,62 @@ class AmazonSpec extends Specification {
         withInstanceType(InstanceType.M1Medium).
         withSubnetId("subnet-18ee497d");
 
-    when: "Requesting one spot instance with a given price and launch Specification"
-    RequestSpotInstancesResult requestSpotInstancesResult = 
+    when: "Requesting a single spot instance with a given price and launch Specification"
+    List<SpotInstanceRequest> spotInstanceRequests =
         ec2Client.requestSpotInstances(new RequestSpotInstancesRequest("0.050").
                                             withInstanceCount(1).
-                                            withLaunchSpecification(launchSpecification))
+                                            withLaunchSpecification(launchSpecification)).
+          getSpotInstanceRequests()
 
     then: "The extracted spot instance requests collection has size 1"
-    List<SpotInstanceRequest> spotRequests = requestSpotInstancesResult.getSpotInstanceRequests()
-    List<String> spotInstanceRequestIds = new ArrayList<String>();
-    for(SpotInstanceRequest sir: spotRequests) {
-      spotInstanceRequestIds.add(sir.getSpotInstanceRequestId());
-    }
-    spotInstanceRequestIds.size() == 1;
+    spotInstanceRequests.size() == 1;
 
     when: "Querying EC2 repeatedly for all spot requests reaching 'fulfilled' status"
-    DescribeSpotInstanceRequestsRequest dsirRequest = new DescribeSpotInstanceRequestsRequest().
-        withSpotInstanceRequestIds(spotInstanceRequestIds)
+    String spotInstanceRequestId = spotInstanceRequests.iterator().next().getSpotInstanceRequestId();
+    DescribeSpotInstanceRequestsRequest describeSpotInstanceRequestsRequest = 
+        new DescribeSpotInstanceRequestsRequest().
+            withSpotInstanceRequestIds(spotInstanceRequestId)
 
     for(Boolean fulfilled = false; !fulfilled; ) {
-      sleep 60000;
+      sleep 30000;
       fulfilled = true;
-      spotRequests = ec2Client.describeSpotInstanceRequests(dsirRequest).getSpotInstanceRequests()
-      for(SpotInstanceRequest sir: spotRequests) {
-        fulfilled &= sir.getStatus().getCode().equals("fulfilled")
+      spotInstanceRequests = ec2Client.describeSpotInstanceRequests(describeSpotInstanceRequestsRequest).
+          getSpotInstanceRequests();
+      for(SpotInstanceRequest sir: spotInstanceRequests) {
+        fulfilled &= sir.getStatus().getCode().equals("fulfilled");
       }      
     }
 
-    then: "The extracted instances collection has size 1"
-    List<String> instances = new ArrayList<String>();
-    for(SpotInstanceRequest sir: spotRequests) {
-      instances.add(sir.getInstanceId());
-    }
+    then:
+    spotInstanceRequests.size() == 1;
+
+    when: "Requesting the description of the single instance"
+    String instanceId = spotInstanceRequests.iterator().next().getInstanceId();
+    DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(
+        new DescribeInstancesRequest().withInstanceIds(instanceId));
+
+    then: "There is a single reservation with a single instance"
+    List<Reservation> reservations = describeInstancesResult.getReservations();
+    reservations.size() == 1;
+
+    and: "There is a single instance"
+    List<Instance> instances = reservations.iterator().next().getInstances();
     instances.size() == 1;
+
+    and: "The instance is is pending or running"
+    def instance = instances.iterator().next();
+    def instanceState = instance.getState().getName()
+    instanceState.equals("pending") || instanceState.equals("running");
+
+    when: "Calling terminateInstances() with the single instance id"
+    TerminateInstancesResult terminateInstancesResult = 
+        ec2Client.terminateInstances(new TerminateInstancesRequest().
+                                            withInstanceIds(instance.getInstanceId()));
+
+    then: "The instance is shutting down"
+    terminateInstancesResult.getTerminatingInstances().every{ 
+      it.getCurrentState().getName().equals("shutting-down")}
+
   }
 
   def "An instance can be queried"() {
@@ -109,16 +133,15 @@ class AmazonSpec extends Specification {
     instances[0].getPrivateIpAddress().equals(myIpAddress);
   }
 
-  @Ignore
   def "An instance can be terminated"() {
 
     given: "A running instance with known instance ID and private IP"
-    def myInstanceId = "i-ae714e4b"
+    def myInstanceId = "i-223801c7"
 
     and: "An AWS EC2 handle"
     AmazonEC2 ec2Client = new AmazonEC2Client().withRegion(Region.getRegion(Regions.EU_WEST_1));
 
-    when: "Calling terminateInstances)"
+    when: "Calling terminateInstances"
     TerminateInstancesResult terminateInstancesResult = 
         ec2Client.terminateInstances(new TerminateInstancesRequest().
                                             withInstanceIds(myInstanceId));
