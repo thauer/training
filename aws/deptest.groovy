@@ -4,5 +4,5 @@
 @Grab('thauer:aws:0.1.0')
 import net.hauers.aws.SimpleAws
 
-println new SimpleAws().querySingleInstance("i-28b188cd")
+println new SimpleAws().querySingleInstance("i-59185b19")
 
