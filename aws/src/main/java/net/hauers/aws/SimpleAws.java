@@ -42,4 +42,62 @@ class SimpleAws extends AmazonEC2Client{
 
     return instances.iterator().next();
   }
+
+
+  public List<Instance> launchSpots(int spotCount) {
+
+    LaunchSpecification launchSpecification = new LaunchSpecification().
+        withAllSecurityGroups(new GroupIdentifier().withGroupId("sg-29c16d4c")).
+        withImageId("ami-22298b55").
+        withInstanceType(InstanceType.M1Medium).
+        withSubnetId("subnet-18ee497d");
+
+    List<SpotInstanceRequest> spotInstanceRequests =
+        requestSpotInstances(new RequestSpotInstancesRequest("0.050").
+                                            withInstanceCount(spotCount).
+                                            withLaunchSpecification(launchSpecification)).
+            getSpotInstanceRequests();
+
+    List<String> spotInstanceRequestIds = new ArrayList<String>();
+    for(SpotInstanceRequest spotInstanceRequest: spotInstanceRequests) {
+      spotInstanceRequestIds.add(spotInstanceRequest.getSpotInstanceRequestId());
+    }
+
+    DescribeSpotInstanceRequestsRequest describeSpotInstanceRequestsRequest = 
+        new DescribeSpotInstanceRequestsRequest().
+            withSpotInstanceRequestIds(spotInstanceRequestIds);
+
+    long threshold = System.currentTimeMillis() + 1000*60*10;
+    Boolean fulfilled = false;
+    while(System.currentTimeMillis() < threshold && !fulfilled) {
+      try{
+        Thread.sleep(30000);
+      } catch(InterruptedException e) {
+        threshold = System.currentTimeMillis() - 1;
+      }
+      fulfilled = true;
+      spotInstanceRequests = describeSpotInstanceRequests(describeSpotInstanceRequestsRequest).
+          getSpotInstanceRequests();
+      for(SpotInstanceRequest spotInstanceRequest: spotInstanceRequests) {
+        fulfilled &= spotInstanceRequest.getStatus().getCode().equals("fulfilled");
+      }
+    }
+
+    if(!fulfilled) {
+      System.out.println("NOT ALL FULFILLED - TODO");
+    }
+
+    List<Instance> instances = new ArrayList<Instance>();
+    for(SpotInstanceRequest spotInstanceRequest: spotInstanceRequests){
+      DescribeInstancesResult describeInstancesResult = describeInstances(
+          new DescribeInstancesRequest().withInstanceIds(spotInstanceRequest.getInstanceId()));
+
+      for(Reservation reservation: describeInstancesResult.getReservations()){
+        for(Instance instance: reservation.getInstances()){
+          instances.add(instance);
+        }
+      }
+    }
+    return instances;
+  }
 }

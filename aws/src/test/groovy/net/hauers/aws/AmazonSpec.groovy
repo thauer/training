@@ -24,6 +24,7 @@ import java.util.List;
 
 class AmazonSpec extends Specification {
 
+  @IgnoreRest
   def "An authenticated call can be made"() {
 
     given:  "An AWS EC2 handle"
@@ -36,7 +37,7 @@ class AmazonSpec extends Specification {
     regions.any{it.regionName == "us-east-1"}
   }
 
-  @Ignore
+  @Timeout(600)
   def "A single spot instance can be requested, it should be fulfilled and started"() {
 
     given: "An AWS EC2 handle"
@@ -66,7 +67,7 @@ class AmazonSpec extends Specification {
             withSpotInstanceRequestIds(spotInstanceRequestId)
 
     for(Boolean fulfilled = false; !fulfilled; ) {
-      sleep 30000;
+      sleep 30000, { throw it };;
       fulfilled = true;
       spotInstanceRequests = ec2Client.describeSpotInstanceRequests(describeSpotInstanceRequestsRequest).
           getSpotInstanceRequests();
@@ -75,7 +76,10 @@ class AmazonSpec extends Specification {
       }      
     }
 
-    then: "After this process, spotInstanceRequests has one element"
+    then: "The request does not time out"
+    notThrown InterruptedException
+
+    and: "After this process, spotInstanceRequests has one element"
     spotInstanceRequests.size() == 1;
 
     when: "Requesting the description of the single instance"
@@ -100,6 +104,83 @@ class AmazonSpec extends Specification {
     TerminateInstancesResult terminateInstancesResult = 
         ec2Client.terminateInstances(new TerminateInstancesRequest().
                                             withInstanceIds(instance.getInstanceId()));
+  }
+
+  @Timeout(600)
+  def "Multiple spot instances can be requested"() {
+
+    given: "An AWS EC2 handle"
+    AmazonEC2 ec2Client = new AmazonEC2Client().withRegion(Region.getRegion(Regions.EU_WEST_1));
+
+    and: "A lauch specification shared by the instances to be started"
+    LaunchSpecification launchSpecification = new LaunchSpecification().
+        withAllSecurityGroups(new GroupIdentifier().withGroupId("sg-29c16d4c")).
+        withImageId("ami-22298b55").
+        withInstanceType(InstanceType.M1Medium).
+        withSubnetId("subnet-18ee497d");
+
+    when: "Requesting a single spot instance with a given price and launch Specification"
+    List<SpotInstanceRequest> spotInstanceRequests =
+        ec2Client.requestSpotInstances(new RequestSpotInstancesRequest("0.050").
+                                            withInstanceCount(2).
+                                            withLaunchSpecification(launchSpecification)).
+          getSpotInstanceRequests()
+
+    then: "The extracted spot instance requests collection has size 1"
+    spotInstanceRequests.size() == 2;
+
+    when: "Querying EC2 repeatedly for all spot requests reaching 'fulfilled' status"
+    List<String> spotInstanceRequestIds = new ArrayList<String>();
+    for(SpotInstanceRequest sir: spotInstanceRequests) {
+      spotInstanceRequestIds.add(sir.getSpotInstanceRequestId())
+    }
+
+    DescribeSpotInstanceRequestsRequest describeSpotInstanceRequestsRequest = 
+        new DescribeSpotInstanceRequestsRequest().
+            withSpotInstanceRequestIds(spotInstanceRequestIds)
+
+    for(Boolean fulfilled = false; !fulfilled; ) {
+      sleep 30000, { throw it };
+      fulfilled = true;
+      spotInstanceRequests = ec2Client.describeSpotInstanceRequests(describeSpotInstanceRequestsRequest).
+          getSpotInstanceRequests();
+      for(SpotInstanceRequest sir: spotInstanceRequests) {
+        fulfilled &= sir.getStatus().getCode().equals("fulfilled");
+      }      
+    }
+
+    then: "This indicates that no timeout occured"
+    notThrown InterruptedException
+
+    and: "After this process, spotInstanceRequests has one element"
+    spotInstanceRequests.size() == 2;
+
+    when: "Requesting the description of the instances"
+    List<Instance> instances = new ArrayList<Instance>();
+    for(SpotInstanceRequest spotInstanceRequest: spotInstanceRequests){
+      DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(
+          new DescribeInstancesRequest().withInstanceIds(spotInstanceRequest.getInstanceId()));
+
+      for(Reservation reservation: describeInstancesResult.getReservations()){
+        for(Instance instance: reservation.getInstances()){
+          instances.add(instance);
+        }
+      }
+    }
+
+    then: "Two corresponding instances are found"
+    instances.size() == 2;
+
+    and: "The state of the instances is pending or running"
+    instances.every{ instance -> 
+      def instanceState = instance.getState().getName();
+      instanceState.equals("pending") || instanceState.equals("running");  
+    }
+
+    cleanup: "Calling terminateInstances() with the single instance id"
+    TerminateInstancesResult terminateInstancesResult = 
+        ec2Client.terminateInstances(new TerminateInstancesRequest().
+                                            withInstanceIds(instances.collect{it.instanceId}));
   }
 
   def "An instance can be queried"() {
@@ -128,7 +209,6 @@ class AmazonSpec extends Specification {
     instances[0].getPrivateIpAddress().equals(myIpAddress);
   }
 
-  @Ignore
   def "An instance can be terminated"() {
 
     given: "A running instance with known instance ID and private IP"
