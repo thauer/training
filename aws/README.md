@@ -16,7 +16,8 @@ The following groovy script is included and illustrates how this is meant to be 
 ```
 #!/usr/bin/env groovy 
 
-@GrabResolver(name='thauer', root='http://bit.ly/thauer-aws-maven')
+@GrabResolver('https://dl.dropboxusercontent.com/u/23240137/maven-repository')
+@GrabConfig(systemClassLoader = true)
 @Grab('thauer:aws:0.1.0')
 import net.hauers.aws.SimpleAws
 

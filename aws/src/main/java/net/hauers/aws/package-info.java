@@ -10,7 +10,8 @@
  *
  * <pre>
  * #!/usr/bin/env groovy 
- * &#64;GrabResolver(name='thauer', root='http://bit.ly/thauer-aws-maven')
+ * &#64;GrabResolver('https://dl.dropboxusercontent.com/u/23240137/maven-repository')
+ * &#64;GrabConfig(systemClassLoader = true)
  * &#64;Grab('thauer:aws:0.1.0')
  * import net.hauers.aws.SimpleAws
  * 
