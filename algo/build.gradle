@@ -22,4 +22,5 @@ task wrapper(type: Wrapper) {
 
 test.testLogging { 
   exceptionFormat "full" 
+  showStandardStreams = true
 }

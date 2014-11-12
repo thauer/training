@@ -6,14 +6,21 @@ class GraphSpec extends Specification {
 
   def "A graph can be created"() {
     when:
-    def v1 = new Vertex();
-    def v2 = new Vertex([v1], [7]);
-    def v3 = new Vertex([v1, v2], [9, 10]);
-    def v4 = new Vertex([v2, v3], [15, 11]);
-    def v5 = new Vertex([v4],[6]);
-    def v6 = new Vertex([v1, v3, v5],[14, 2, 9]);
+    def g = new Graph<Object,Object>()
+    def v = (0..6).collect{def o = new Object(){String toString(){ return it; }}; if(it > 0) g.addVertex(o); o }
 
+    g.addEdge(new Integer(7), v[1], v[2])
+    g.addEdge(new Integer(9){ boolean equals(Object x){ return x.hashCode() == this.hashCode() }, v[1], v[3])
+    g.addEdge(new Integer(14), v[1], v[6])
+    g.addEdge(new Integer(10), v[2], v[3])
+    g.addEdge(new Integer(15), v[2], v[4])
+    g.addEdge(new Integer(11), v[3], v[4])
+    g.addEdge(new Integer(2), v[3], v[6])
+    g.addEdge(new Integer(6), v[4], v[5])
+    g.addEdge(new Integer(9){ boolean equals(Object x){ return x.hashCode() == this.hashCode() }, v[5], v[6])
+
+    g.dijkstra(v[1],v[5])
     then:
-    [v2,v3,v6].every{it in v1.neighbors}
+    true
   }
 }
