@@ -33,3 +33,9 @@ uploadArchives {
     }
   }
 }
+
+javadoc {
+  destinationDir "/home/thauer/Dropbox/Public/SimpleAws/javadoc" as File
+  options.links 'https://docs.oracle.com/javase/7/docs/api/',
+   'http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/'
+}

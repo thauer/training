@@ -21,14 +21,24 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+  * This class extends the AmazonEC2Client with a few convenience methods.
+  */
+public class SimpleAws extends AmazonEC2Client{
 
-class SimpleAws extends AmazonEC2Client{
-
+  /**
+   * Constructor
+   */
   public SimpleAws() {
     super();
     setRegion(Region.getRegion(Regions.EU_WEST_1));
   }
 
+  /**
+   * Queries for a single EC2 instance.
+   * @param  instanceId The instance id to query.
+   * @return the found instance.
+   */
   public Instance querySingleInstance(String instanceId) {
 
     DescribeInstancesResult describeInstancesResult = describeInstances(
@@ -43,7 +53,13 @@ class SimpleAws extends AmazonEC2Client{
     return instances.iterator().next();
   }
 
-
+  /**
+   * Launches a set of spot instances. Sends a spot request based on a predefined launch
+   * specification (hardcoded group id, image id, instance type, subnet). Waits for the spot
+   * requests to be fulfilled with a timeout of 10 minutes.
+   * @param  spotCount The number of instances to start
+   * @return List of instances
+   */
   public List<Instance> launchSpots(int spotCount) {
 
     LaunchSpecification launchSpecification = new LaunchSpecification().
