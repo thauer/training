@@ -3,13 +3,13 @@
  * This is a thin wrapper on the AWS SDK for Java.
  * <p>Mostly developed as a coding exercise</p>
  * <h3>Distribution</h3>
- * <p>Have not thought about license, thus there is not one yet.
+ * <p>Have not thought about license, thus there isn't one yet.
  *
  * <h3>Example</h3>
  * The following groovy script is included and illustrates the kind of things this is good for
  *
- * #!/usr/bin/env groovy 
  * <pre>
+ * #!/usr/bin/env groovy 
  * &#64;GrabResolver(name='thauer', 
  *   root='https://dl.dropboxusercontent.com/u/23240137/maven-repository',
  *   m2Compatible='true')
