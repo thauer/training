@@ -1,7 +1,7 @@
 /**
  * Amazon AWS Convenience Wrappers for EC2<p>
  * This is a thin wrapper on the AWS SDK for Java.
- * <p>Mostly developed as a [coding exercise](http://bit.ly/thauer-aws-github)</p>
+ * <p>Mostly developed as a <a href="http://bit.ly/thauer-aws-github">coding exercise</a></p>
  * <h3>Distribution</h3>
  * <p>Have not thought about license, thus there isn't one yet.
  *
