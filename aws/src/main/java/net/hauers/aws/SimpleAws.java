@@ -34,12 +34,12 @@ class SimpleAws extends AmazonEC2Client{
     DescribeInstancesResult describeInstancesResult = describeInstances(
         new DescribeInstancesRequest().withInstanceIds(instanceId));
 
-    List<Instance> instances = new ArrayList<Instance>();
-    for(Reservation reservation: describeInstancesResult.getReservations()){
-      for(Instance instance: reservation.getInstances()){
-        instances.add(instance);
-      }
-    }
+    List<Reservation> reservations = describeInstancesResult.getReservations();
+    assert reservations.size() == 1;
+
+    List<Instance> instances = reservations.iterator().next().getInstances();
+    assert instances.size() == 1;
+
     return instances.iterator().next();
   }
 }

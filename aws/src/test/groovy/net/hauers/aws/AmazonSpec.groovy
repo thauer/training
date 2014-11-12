@@ -36,7 +36,7 @@ class AmazonSpec extends Specification {
     regions.any{it.regionName == "us-east-1"}
   }
 
-  @IgnoreRest
+  @Ignore
   def "A single spot instance can be requested, it should be fulfilled and started"() {
 
     given: "An AWS EC2 handle"
@@ -75,7 +75,7 @@ class AmazonSpec extends Specification {
       }      
     }
 
-    then:
+    then: "After this process, spotInstanceRequests has one element"
     spotInstanceRequests.size() == 1;
 
     when: "Requesting the description of the single instance"
@@ -91,20 +91,15 @@ class AmazonSpec extends Specification {
     List<Instance> instances = reservations.iterator().next().getInstances();
     instances.size() == 1;
 
-    and: "The instance is is pending or running"
+    and: "The state of the instance is pending or running"
     def instance = instances.iterator().next();
     def instanceState = instance.getState().getName()
     instanceState.equals("pending") || instanceState.equals("running");
 
-    when: "Calling terminateInstances() with the single instance id"
+    cleanup: "Calling terminateInstances() with the single instance id"
     TerminateInstancesResult terminateInstancesResult = 
         ec2Client.terminateInstances(new TerminateInstancesRequest().
                                             withInstanceIds(instance.getInstanceId()));
-
-    then: "The instance is shutting down"
-    terminateInstancesResult.getTerminatingInstances().every{ 
-      it.getCurrentState().getName().equals("shutting-down")}
-
   }
 
   def "An instance can be queried"() {
@@ -133,6 +128,7 @@ class AmazonSpec extends Specification {
     instances[0].getPrivateIpAddress().equals(myIpAddress);
   }
 
+  @Ignore
   def "An instance can be terminated"() {
 
     given: "A running instance with known instance ID and private IP"
