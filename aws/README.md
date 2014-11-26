@@ -7,18 +7,17 @@ Mostly developed as a coding exercise
 
 # Distribution
 
-Have not thought about license, thus there is not one yet. For the moment, javadoc is [here](https://dl.dropboxusercontent.com/u/23240137/SimpleAws/javadoc/index.html). Maven repo is [here](ttps://dl.dropboxusercontent.com/u/23240137/maven-repository)
+Have not thought about license, thus there is not one yet. For the moment, javadoc is [here](http://bit.ly/thauer-aws-javadoc). Maven repo is [here](http://bit.ly/thauer-aws-maven)
 
 # Example
 
-The following groovy script is included and illustrates the kind of things this is good for
+The following groovy script is included and illustrates how this is meant to be used:
 
 ```
 #!/usr/bin/env groovy 
 
-@GrabResolver(name='thauer', 
-  root='https://dl.dropboxusercontent.com/u/23240137/maven-repository',
-  m2Compatible='true')
+@GrabResolver('https://dl.dropboxusercontent.com/u/23240137/maven-repository')
+@GrabConfig(systemClassLoader = true)
 @Grab('thauer:aws:0.1.0')
 import net.hauers.aws.SimpleAws
 

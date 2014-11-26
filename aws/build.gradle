@@ -1,7 +1,7 @@
 /*
  * Build script for the AWS wrapper
  *
- * Useful targets: clean, test, install, javadoc
+ * Useful targets: clean, test, install, uploadArchives, javadoc
  */
 apply plugin: 'java'
 apply plugin: 'groovy'
