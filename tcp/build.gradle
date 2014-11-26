@@ -1,0 +1,31 @@
+/*
+ * Build script for socket testing
+ *
+ * Useful targets: clean, test, install, javadoc
+ */
+apply plugin: 'java'
+apply plugin: 'groovy'
+// apply plugin: 'maven'
+
+project.group = "thauer"
+project.version = "0.1.0"
+
+jar {
+  baseName = 'tcp'
+  version = project.version
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  testCompile "org.codehaus.groovy:groovy-all:2.3.7"
+  testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+}
+
+test.testLogging { 
+  showStandardStreams = true
+  exceptionFormat "full" 
+}
