@@ -3,6 +3,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * SRM 465 DIV 2 500: Little Petya folding puzzle
+ * @author thauer
+ */
 public class BoardFolding {
   public int howMany(int N, int M, String[] compressedPaper) {
     int[][] paper1 = new int[N][M];

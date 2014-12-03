@@ -8,16 +8,24 @@ class TopCoderSpec extends spock.lang.Specification {
 	}
   
   @IgnoreRest
-  def "SRM 465 DIV 2 1000 works"() {
+  def "SRM 465 DIV 2 1000: Archibald"() {
     when:
-    def z = 0// new BoardFolding.howMany(x, y);
+    def z = new WeirdTimes().hourValues(minuteValues as int[], K);
     
     then:
-    z == retval 
+    z == retval as int[]
     
     where:
-    x  | y | retval
-    0  | 0 | 0 
+    minuteValues  | K | retval
+    [22,11,33]   | 3 | [0,1,3]  
+    [10]  | 2 | [1] 
+    [2,1] | 20 | [0, 20] 
+    [1,2] | 20 | [0, 19]
+    [45, 12, 0, 3, 2, 7, 4, 9, 23, 6, 17, 33] | 12345 | [0, 1, 2, 2, 3, 3, 4, 5, 12, 13, 18, 18]
+    [43, 58] | 318 | [-1]
+    [25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 
+      15, 15, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] | 1 | [-1]
+      
   }
   
   /*
@@ -39,16 +47,25 @@ class TopCoderSpec extends spock.lang.Specification {
     3 | 3 | [ "0", "2", "0" ] as String[] | 1
   }
   
+  /*
+   * 
+   */
   def "SRM 465 DIV 2 250: Archibald neighboring pairs"() {
     expect:
     true // int NumberNeighbours().numPairs(int[] numbers)
   }
   
+  /*
+   * 
+   */
   def "SRM 465 DIV 2 500: Archibald turret placement"() {
     expect:
     true // long TurretPlacement().count(int[] x, int[] y)
   }
   
+  /*
+   * 
+   */
   def "SRM 639 DIV 1 250: Alice Game"() {
     expect:
     retval == new AliceGame().findMinimumValue(x,y)
