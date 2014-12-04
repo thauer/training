@@ -1,4 +1,7 @@
 
+/**
+ * SRM 465 DIV 2 1000
+ */
 public class WeirdTimes {
 	
 	public int[] hourValues(int[] minuteValues, int K) {

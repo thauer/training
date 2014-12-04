@@ -8,7 +8,22 @@ class TopCoderSpec extends spock.lang.Specification {
 	}
   
   @IgnoreRest
-  def "SRM 465 DIV 2 1000: Archibald"() {
+  def "SRM "() {
+    when:
+    def z = x
+    
+    then: 
+    z == retval
+    
+    where:
+    x | y | retval
+    0 | 0 | 0  
+  }
+  
+  /*
+   * Got 325.72 points out of 1000
+   */
+  def "SRM 465 DIV 2 1000: Archibald Weird Times"() {
     when:
     def z = new WeirdTimes().hourValues(minuteValues as int[], K);
     
