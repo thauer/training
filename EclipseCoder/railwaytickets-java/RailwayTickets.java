@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * SRM 348 DIV 1 - 500 
+ */
 public class RailwayTickets {
-
 	public int minRejects(String[] travel, int seats) {
 
 	  List<Segment> segments = new ArrayList<Segment>();
@@ -16,13 +18,12 @@ public class RailwayTickets {
 	      segments.add(new Segment(s));
 	    }
 	  }
-	  Collections.sort(segments, new Comparator<Segment>(){
-	    @Override
-	    public int compare(Segment s1, Segment s2) {return s1.end.compareTo(s2.end);}}
+	  Collections.sort(segments, 
+	      new Comparator<Segment>(){
+	        @Override
+	        public int compare(Segment s1, Segment s2) {return s1.end.compareTo(s2.end);}
+        }
 	  );
-	  System.out.print("Segments (" + segments.size() + "):");
-	  for(Segment segment: segments) System.out.print(" " + segment);
-    System.out.println("\nSeats: " + seats);
     // At most 600 (50 * 12) segments.
     return minRejects(segments, seats);
 	}
@@ -30,38 +31,25 @@ public class RailwayTickets {
 	private int minRejects(List<Segment> segments, int seats)
 	{
 	  SortedSet<Segment> running = new TreeSet<Segment>();
-	  
-	  for(Iterator<Segment> segiter = segments.iterator(); segiter.hasNext(); ) {
-	    Segment nextSegment = segiter.next();
-	    if(running.size()<seats){
-	      running.add(nextSegment);
-	    } else {
-	      Iterator<Segment> runiter=running.iterator();
-	      for(; runiter.hasNext() && runiter.next().compareTo(nextSegment) < 0; );
+	  int reject = 0;
+	      
+	  for(Segment nextSegment: segments){
+	    Iterator<Segment> runiter=running.iterator();
+	    boolean found = false;
+      for(; ! found && runiter.hasNext();){
+        found = (nextSegment.start >= runiter.next().end);
+      }
+      if(found) {
         runiter.remove();
-        running.add(nextSegment);
-	    }
-	  }
-	  
-    Segment[] current = new Segment[seats];
-    for(int i=0; i<seats; current[i]=new Segment("0-0"));
-    
-    int reject = 0;
-    
-    for(Segment nextSegment: segments) {
-      
-      for(Iterator<Segment> runningIter = running.iterator(); runningIter.hasNext(); ) {
-        if(runningIter.next().end<=nextSegment.start) {
-          runningIter.remove();
+        running.add(nextSegment);        
+      } else {
+        if(running.size() < seats){
+          running.add(nextSegment);
+        } else {
+          reject++;
         }
       }
-      for(Segment segment: running) System.out.print(" " + segment); System.out.println();
-      if(running.size()<seats) { 
-        running.add(nextSegment);
-      } else {
-        reject++;
-      }
-    }    
+	  }
 		return reject;
 	}
 	
@@ -73,13 +61,9 @@ public class RailwayTickets {
 	    start = Integer.parseInt(endpoints[0]);
 	    end = Integer.parseInt(endpoints[1]);
 	  }
-	  @Override
-	  public String toString(){
-	    return "" + start + "-" + end;
-	  }
     @Override
     public int compareTo(Segment o) {
-      return -this.end.compareTo(o.end);
+      return this.end.compareTo(o.end) == 0 ? 1: -this.end.compareTo(o.end);
     }
 	}
 }
