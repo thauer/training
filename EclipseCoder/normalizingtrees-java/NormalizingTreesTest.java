@@ -71,7 +71,7 @@ public class NormalizingTreesTest {
         Assert.assertArrayEquals(expected, actual);
     }
     
-    @Test(timeout = 15000)
+    @Test(timeout = 2000)
     public void testCase6() {
         int[] tree = new int[]{21, 25, 17, 24, 17, 21, 26, 40, 34, 18, 42, 
             46, 13, 45, 45, 33, 25, 36, 26, 9, 42, 24, 47, 40, 26, 18, -1, 
@@ -88,4 +88,27 @@ public class NormalizingTreesTest {
 
         Assert.assertArrayEquals(expected, actual);
     }   
-}
+    
+    @Test(timeout = 2000)
+    public void testCase7() {
+        int[] tree = new int[]{2, 13, 4, 14, 11, 4, 37, 38, 37, 27, 27, 37, 37, 43, 45, 22, 44, 39, 32, 25, 18, 25, 23, 37, 23, 24, 3, 26, 23, 30, 32, 43, 28, 42, 23, 30, 21, -1, 28, 23, 34, 11, 39, 37, 21, 11, 
+            25};
+
+        int[] expected = new int[]{-1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 7, 7, 8, 8, 9, 10, 11, 12, 12, 13, 15, 17, 17, 18, 19, 21, 21, 21, 24, 26, 28, 28, 29, 32, 32, 36, 40, 42, 44, 
+            44 };
+        int[] actual = solution.normalize(tree);
+
+        Assert.assertArrayEquals(expected, actual);
+    }   
+    
+    @Test(timeout = 2000)
+    public void testCase8() {
+        int[] tree = new int[]{43, 13, 41, 29, 36, 2, 17, -1, 18, 0, 3, 42, 10, 5, 17, 3, 42, 42, 30, 24, 10, 1, 41, 7, 10, 47, 16, 19, 8, 41, 0, 40, 24, 7, 29, 41, 7, 3, 34, 34, 38, 36, 23, 42, 45, 18, 3, 24, 28, 36};
+
+        int[] expected = new int[]{-1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 6, 6, 9, 9, 9, 9, 10, 10, 11, 12, 14, 14, 14, 18, 20, 21, 21, 21, 21, 22, 22, 22, 25, 26, 27, 27, 28, 29, 31, 32, 38, 38, 42, 44, 44, 45, 46, 47 };
+        int[] actual = solution.normalize(tree);
+
+        Assert.assertArrayEquals(expected, actual);
+    }   
+    
+ }
