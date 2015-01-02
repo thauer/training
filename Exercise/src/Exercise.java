@@ -70,5 +70,5 @@ public class Exercise {
       sb.append(inputString.charAt(i));
     }
     return sb.toString();
-  }  
+  }
 }
