@@ -54,6 +54,7 @@ public class StackQueueProblems {
     public T getMin() {
       return head == null ? null : head.min;
     }
+    
   }
   
   public static void main(String[] args) {
