@@ -1,0 +1,28 @@
+---
+# file: aws.yml
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars: 
+    ami_id_stock_ubuntu: ami-234ecc54
+
+  tasks:
+    - ec2_vpc:
+        state: present
+        cidr_block: 10.15.30.0/24
+        resource_tags: { "Name": "matas2" }
+        subnets:
+          - cidr: 10.15.30.0/24
+            az: us-east-1b
+            resource_tags: { "Name": "matas2" }
+        internet_gateway: True
+        route_tables:
+          - subnets:
+              - 10.15.30.0/24
+            routes:
+              - dest: 0.0.0.0/0
+                gw: igw
+            resource_tags: { "Name": "matas2" }
+        region: us-east-1
+      register: vpc
