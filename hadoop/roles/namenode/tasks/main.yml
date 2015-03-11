@@ -1,0 +1,50 @@
+---
+# file: roles/namenode/main.yml
+
+- shell: cat ~/.ssh/known_hosts || true
+  register: known_hosts
+  changed_when: false
+
+- name: Get rid of the unknown host question
+  command: sh -c 'ssh-keyscan -t rsa {{ item }} >> $HOME/.ssh/known_hosts'
+  when: known_hosts.stdout.find("{{item}}") == -1
+  with_items:
+    - 0.0.0.0
+    - 127.0.0.1
+    - localhost
+
+- name: Get rid of the unknown host question
+  command: sh -c 'ssh-keyscan -t rsa {{ hostvars[item].ansible_eth0.ipv4.address }} >> $HOME/.ssh/known_hosts'
+  when: known_hosts.stdout.find("{{hostvars[item].ansible_eth0.ipv4.address}}") == -1
+  with_items: groups['all']
+
+- name: Get rid of the unknown host question
+  command: sh -c 'ssh-keyscan -t rsa {{ hostvars[item].ansible_hostname }} >> $HOME/.ssh/known_hosts'
+  when: known_hosts.stdout.find("{{hostvars[item].ansible_hostname}}") == -1
+  with_items: groups['all']
+
+- name: Get rid of the unknown host question
+  command: sh -c 'ssh-keyscan -t rsa {{ hostvars[item].ansible_fqdn }} >> $HOME/.ssh/known_hosts'
+  when: known_hosts.stdout.find("{{hostvars[item].ansible_fqdn}}") == -1
+  with_items: groups['all']
+
+- name: copy slaves and masters
+  template: src="slaves" dest="/opt/hadoop-2.6.0/etc/hadoop/"
+  
+- name: Format HDFS
+  command: hdfs namenode -format
+  args:
+    creates: "/home/hadoop/Training/hadoop_work/data/name/current"        
+  environment:
+    PATH: /opt/hadoop-2.6.0/bin:{{ ansible_env.PATH }}
+
+- name: Check if HDFS is running
+  shell: ps -eo pcpu,user,args | grep -v grep | grep -o org.apache.hadoop.hdfs.server.* || true
+  register: ps
+  changed_when: false
+
+- name: Start HDFS Service
+  command: start-dfs.sh
+  environment:
+    PATH: /opt/hadoop-2.6.0/bin:/opt/hadoop-2.6.0/sbin:{{ ansible_env.PATH }}
+  when: '"org.apache.hadoop.hdfs.server.namenode.NameNode" not in ps.stdout_lines'

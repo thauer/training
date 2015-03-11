@@ -1,4 +1,23 @@
 ###
 # ansible inventory file
 
+[client]
+10.15.20.67
+
+[namenode]
 10.15.20.217
+
+[secondarynamenode]
+10.15.20.30
+
+[datanodes]
+10.15.20.48
+10.15.20.197
+10.15.20.201
+10.15.20.245
+10.15.20.35
+10.15.20.178
+
+[datanodes:children]
+namenode
+secondarynamenode

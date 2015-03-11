@@ -1,0 +1,28 @@
+---
+# file: roles/client/main.yml
+
+- name: Create homedir for ubuntu
+  sudo: yes
+  sudo_user: hadoop
+  command: hdfs dfs -mkdir -p /user/ubuntu
+  environment:
+    PATH: /opt/hadoop-2.6.0/bin:{{ ansible_env.PATH }}
+  changed_when: false
+  
+- name: Assign ownership of /user/ubuntu
+  sudo: yes
+  sudo_user: hadoop
+  command: hdfs dfs -chown 'ubuntu:ubuntu' /user/ubuntu
+  environment:
+    PATH: /opt/hadoop-2.6.0/bin:{{ ansible_env.PATH }}
+  changed_when: false
+
+- name: Create a 800MB random file
+  command: dd if=/dev/urandom of=test.log bs=10M count=80
+  args:
+    creates: /home/ubuntu/test.log
+
+- name: Copy to hdfs
+  command: hdfs dfs -put test.log /user/ubuntu/
+  environment:
+    PATH: /opt/hadoop-2.6.0/bin:{{ ansible_env.PATH }}

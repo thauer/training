@@ -1,116 +1,31 @@
 ---
 # file: site.yml
+# Master playbook for hadoop
 
 # Gather facts first:
 - hosts: all
+
+- hosts: namenode
   sudo: yes
   tasks:
+  - name: Create hadoop group
+    group: name=hadoop
 
-    - name: Update APT package cache and upgrade APT to the latest packages
-      apt: update_cache=yes cache_valid_time=3600
+  - name: Create hadoop user
+    user: name=hadoop group=hadoop shell=/bin/bash generate_ssh_key=yes
 
-    - name: Installs rsync
-      apt: name=rsync
+  - name: Fetch the generated key
+    fetch: src=/home/hadoop/.ssh/id_rsa.pub dest=/tmp/hadoop.id_rsa.pub flat=yes
 
-    - name: Installs java
-      apt: name=openjdk-7-jdk
+- hosts: all
+  sudo: yes
+  roles: [common]
 
-    - name: download hadoop archive
-      get_url: url=http://www.pirbot.com/mirrors/apache/hadoop/common/current/hadoop-2.6.0.tar.gz
-        dest=/tmp/hadoop.tar.gz
+- hosts: namenode
+  sudo: yes
+  sudo_user: hadoop
+  roles: [namenode]
 
-    - name: Create hadoop group
-      group: name=hadoop
-
-    - name: Create hadoop user
-      user: name=hadoop group=hadoop shell=/bin/bash generate_ssh_key=yes
-
-    - name: Fetch the generated key
-      fetch: src=/home/hadoop/.ssh/id_rsa.pub dest=/tmp/hadoop.id_rsa.pub flat=yes
-
-    - name: Add passphraseless localhost login by adding the generated key to authorized_keys
-      authorized_key: user=hadoop key="{{ lookup('file', '/tmp/hadoop.id_rsa.pub') }}"
-
-    - shell: cat ~/.ssh/known_hosts
-      sudo_user: hadoop
-      register: known_hosts
-      ignore_errors: yes
-      changed_when: false
-
-    - name: Get rid of the unknown host question
-      sudo_user: hadoop
-      command: sh -c 'ssh-keyscan -t rsa {{ item }} >> $HOME/.ssh/known_hosts'
-      when: known_hosts.stdout.find("{{item}}") == -1
-      with_items:
-        - 0.0.0.0
-        - 127.0.0.1
-        - localhost
-
-    - name: unpack the archive
-      unarchive: src=/tmp/hadoop.tar.gz dest=/opt copy=false
-        creates=/opt/hadoop-2.6.0/etc/hadoop
-
-    - name: assign ownership
-      file: path=/opt/hadoop-2.6.0 owner=hadoop group=hadoop recurse=yes
-
-    - name: Specify JAVA_HOME
-      sudo_user: hadoop
-      lineinfile: dest=/opt/hadoop-2.6.0/etc/hadoop/hadoop-env.sh
-        regexp='^export JAVA_HOME='
-        line='export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64'
-
-    - name: Specify HADOOP_PREFIX
-      sudo_user: hadoop
-      lineinfile: dest=/opt/hadoop-2.6.0/etc/hadoop/hadoop-env.sh
-        line="{{ item }}"
-        insertbefore=BOF
-      with_items: 
-        - "export HADOOP_CONF_DIR=$HADOOP_PREFIX/etc/hadoop"
-        - "export HADOOP_HOME=$HADOOP_PREFIX"
-        - "export HADOOP_PREFIX=/opt/hadoop-2.6.0"
-
-    - name: Augment PATH 
-      sudo_user: hadoop
-      lineinfile: dest=/opt/hadoop-2.6.0/etc/hadoop/hadoop-env.sh
-        line="export PATH=$PATH:$HADOOP_HOME/bin"
-        insertafter=EOF
-
-    - name: Test the installation
-      sudo: no
-      shell: ". /opt/hadoop-2.6.0/etc/hadoop/hadoop-env.sh && hadoop version"
-      changed_when: false 
-      register: cmd_result
-
-    - assert:
-        that:
-          - "'Hadoop 2.6.0' in cmd_result.stdout"
-
-    - name: copy configuration
-      sudo_user: hadoop
-      copy: src="{{item}}" dest="/opt/hadoop-2.6.0/etc/hadoop/"
-      with_items: 
-        - hdfs-site.xml
-        - core-site.xml
-
-    - name: Format HDFS
-      command: hdfs namenode -format
-      args:
-        creates: "/home/hadoop/Training/hadoop_work/data/name/current"        
-      sudo_user: hadoop
-      environment:
-        PATH: /opt/hadoop-2.6.0/bin:{{ ansible_env.PATH }}
-
-    - name: Check if HDFS is running
-      shell: ps -eo pcpu,user,args | grep -v grep | grep -o org.apache.hadoop.hdfs.server.*
-      ignore_errors: yes
-      register: ps
-      changed_when: false
-
-    - name: Start HDFS Service
-      command: start-dfs.sh
-      sudo_user: hadoop
-      environment:
-        PATH: /opt/hadoop-2.6.0/bin:/opt/hadoop-2.6.0/sbin:{{ ansible_env.PATH }}
-      when: ps.rc != 0
-
-
+- hosts: client
+  tags: client
+  roles: [client]  

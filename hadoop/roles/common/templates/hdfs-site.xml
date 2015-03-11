@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
+
+  <property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>http://{% for host in groups['secondarynamenode'] %}{{hostvars[host].ansible_hostname}}{% endfor %}:50090</value>
+    <description>releasenotes.html: The masters file is no longer used to indicate which hosts to start the 2NN on. The 2NN is now started on hosts when dfs.namenode.secondary.http-address is configured with a non-wildcard IP.</description>
+  </property>
+
   <property>
     <name>dfs.namenode.name.dir</name>
     <value>/home/hadoop/Training/hadoop_work/data/name</value>
     <description>Path on the local filesystem where the NameNode stores the namespace and transactions logs persistently.</description>
   </property>
+
   <property>
     <name>dfs.datanode.data.dir</name>
     <value>/home/hadoop/Training/hadoop_work/data/data</value>
     <description>Comma separated list of paths on the local filesystem of a Datanode where it should store its blocks.</description>
-  </property>  
+  </property>
+
   <property>
     <name>dfs.namenode.checkpoint.dir</name>
     <value>/home/hadoop/Training/hadoop_work/data/secondary_name</value>
     <description>Determines where on the local filesystem the DFS secondary name node should store the temporary images to merge. If this is a comma-delimited list of directories then the image is replicated in all of the directories for redundancy.</description>
   </property>
+  
   <property>
     <name>dfs.replication</name>
-    <value>1</value>
+    <value>3</value>
   </property>
 </configuration>
